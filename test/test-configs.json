@@ -1,0 +1,139 @@
+{
+  "simpleTest": {
+    "screens": [
+      {
+        "id": "welcome",
+        "type": "text",
+        "content": {
+          "title": "Simple Test",
+          "subtitle": "This is a simple test configuration",
+          "color": "#333333",
+          "background": "#ffffff"
+        },
+        "actions": [
+          {
+            "type": "button",
+            "label": "Complete",
+            "color": "#ffffff",
+            "background": "#007AFF",
+            "target": "end"
+          }
+        ]
+      }
+    ]
+  },
+  "fileUploadTest": {
+    "screens": [
+      {
+        "id": "upload",
+        "type": "fileUpload",
+        "content": {
+          "title": "File Upload Test",
+          "subtitle": "Test the file upload functionality",
+          "color": "#333333",
+          "background": "#f8f9fa"
+        },
+        "actions": [
+          {
+            "type": "button",
+            "label": "Skip",
+            "color": "#666666",
+            "background": "transparent",
+            "target": "end"
+          },
+          {
+            "type": "button",
+            "label": "Continue",
+            "color": "#ffffff",
+            "background": "#28a745",
+            "target": "end"
+          }
+        ]
+      }
+    ]
+  },
+  "multiScreenTest": {
+    "screens": [
+      {
+        "id": "step1",
+        "type": "text",
+        "content": {
+          "title": "Step 1",
+          "subtitle": "First step of the test",
+          "color": "#333333",
+          "background": "#ffffff"
+        },
+        "actions": [
+          {
+            "type": "button",
+            "label": "Next",
+            "color": "#ffffff",
+            "background": "#007AFF",
+            "target": "step2"
+          }
+        ]
+      },
+      {
+        "id": "step2",
+        "type": "fileUpload",
+        "content": {
+          "title": "Step 2",
+          "subtitle": "Upload a file",
+          "color": "#333333",
+          "background": "#f8f9fa"
+        },
+        "actions": [
+          {
+            "type": "button",
+            "label": "Next",
+            "color": "#ffffff",
+            "background": "#007AFF",
+            "target": "step3"
+          }
+        ]
+      },
+      {
+        "id": "step3",
+        "type": "banner",
+        "content": {
+          "title": "🎉 Complete!",
+          "subtitle": "Multi-screen test completed",
+          "background": "#28a745",
+          "color": "#ffffff"
+        },
+        "actions": [
+          {
+            "type": "button",
+            "label": "Finish",
+            "color": "#28a745",
+            "background": "#ffffff",
+            "target": "end"
+          }
+        ]
+      }
+    ]
+  },
+  "errorTest": {
+    "screens": [
+      {
+        "id": "error_screen",
+        "type": "invalid_type",
+        "content": {
+          "title": "This should show an error",
+          "subtitle": "Invalid screen type test",
+          "color": "#333333",
+          "background": "#ffffff"
+        },
+        "actions": [
+          {
+            "type": "button",
+            "label": "OK",
+            "color": "#ffffff",
+            "background": "#007AFF",
+            "target": "end"
+          }
+        ]
+      }
+    ]
+  }
+}

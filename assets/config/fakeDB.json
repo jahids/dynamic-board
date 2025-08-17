@@ -1,0 +1,91 @@
+{
+  "screens": [
+    {
+      "id": "screen1",
+      "type": "text",
+      "content": {
+        "title": "Welcome to Our App!",
+        "subtitle": "Let's get you started with a quick setup",
+        "color": "#333333",
+        "background": "#ffffff",
+        "fontSize": "xl"
+      },
+      "actions": [
+        {
+          "type": "button",
+          "label": "Next",
+          "color": "#ffffff",
+          "background": "#007AFF",
+          "target": "screen2"
+        }
+      ]
+    },
+    {
+      "id": "screen2",
+      "type": "fileUpload",
+      "content": {
+        "title": "Upload Your Profile Picture",
+        "subtitle": "This helps personalize your experience",
+        "size": "xl",
+        "color": "#333333",
+        "background": "#f8f9fa"
+      },
+      "actions": [
+        {
+          "type": "button",
+          "label": "Skip",
+          "color": "#666666",
+          "background": "transparent",
+          "target": "screen3"
+        },
+        {
+          "type": "button",
+          "label": "Continue",
+          "color": "#ffffff",
+          "background": "#28a745",
+          "target": "screen3"
+        }
+      ]
+    },
+    {
+      "id": "screen3",
+      "type": "text",
+      "content": {
+        "title": "Almost Done!",
+        "subtitle": "Just a few more details to complete your profile",
+        "color": "#333333",
+        "background": "#ffffff",
+        "fontSize": "lg"
+      },
+      "actions": [
+        {
+          "type": "button",
+          "label": "Finish Setup",
+          "color": "#ffffff",
+          "background": "#dc3545",
+          "target": "end"
+        }
+      ]
+    },
+    {
+      "id": "screen4",
+      "type": "banner",
+      "content": {
+        "title": "🎉 Setup Complete!",
+        "subtitle": "Thank you for completing the onboarding process",
+        "background": "#28a745",
+        "color": "#ffffff",
+        "fontSize": "xl"
+      },
+      "actions": [
+        {
+          "type": "button",
+          "label": "Get Started",
+          "color": "#28a745",
+          "background": "#ffffff",
+          "target": "end"
+        }
+      ]
+    }
+  ]
+}
