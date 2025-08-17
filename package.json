@@ -1,6 +1,6 @@
 {
   "name": "react-onboarding-sdk",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A TypeScript SDK for fetching onboarding data from backend APIs with React hooks support",
   "license": "ISC",
   "author": "bless",
@@ -9,7 +9,8 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "assets/config/fakeDB.json"
   ],
   "scripts": {
     "build": "tsc",
