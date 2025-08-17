@@ -1,210 +1,106 @@
 # react-onboarding-sdk
 
-A TypeScript SDK for fetching onboarding data from backend APIs with React hooks support.
-
-## Features
-
-- 🚀 **TypeScript First** - Full TypeScript support with comprehensive type definitions
-- 📡 **API Integration** - Fetch onboarding data from your backend API
-- ⚛️ **React Hooks** - Built-in React hooks with caching and state management
-- 🔧 **Configurable** - Custom base URL, timeouts, and error handling
-- 📦 **Lightweight** - Minimal dependencies, tree-shakeable
-- 🛡️ **Error Handling** - Comprehensive error handling with typed error codes
-- ⚡ **Caching** - Built-in caching with configurable stale times
-- 🎯 **Developer Friendly** - Clear API, good documentation, and examples
+Mobile-first, Expo-focused onboarding SDK for React Native apps. Fetches onboarding flows from your backend and renders professional screens with automatic navigation and data collection.
 
 ## Installation
 
 ```bash
 npm install react-onboarding-sdk
+# peer deps expected in the host app
+npm install react-native expo @react-native-async-storage/async-storage expo-document-picker
 ```
 
-or
+## Quick Start
 
-```bash
-yarn add react-onboarding-sdk
-```
+```tsx
+import { Onboarding } from 'react-onboarding-sdk';
 
-## Usage
-
-### Basic Usage
-
-```typescript
-import { getOnboardingData, isOnboardingSuccess } from 'react-onboarding-sdk';
-
-async function fetchOnboardingData() {
-  const response = await getOnboardingData('my-app-id');
-  
-  if (isOnboardingSuccess(response)) {
-    console.log('Onboarding data:', response.data);
-    console.log('App ID:', response.data.appId);
-    console.log('Screens:', response.data.screens.length);
-  } else {
-    console.error('Error:', response.error?.message);
-  }
-}
-```
-
-### With Custom Configuration
-
-```typescript
-import { getOnboardingData } from 'react-onboarding-sdk';
-
-const response = await getOnboardingData('my-app-id', {
-  baseUrl: 'http://localhost:3000', // Override for local development
-  timeout: 5000 // 5 second timeout
-});
-```
-
-### React Hook Usage
-
-```typescript
-import React from 'react';
-import { useOnboarding } from 'react-onboarding-sdk';
-
-function OnboardingComponent({ appId }: { appId: string }) {
-  const { data, loading, error, refetch, isStale } = useOnboarding(appId);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  if (!data) return <div>No data</div>;
-
+export default function App() {
   return (
-    <div>
-      <h2>Onboarding for {data.appId}</h2>
-      {isStale && <p>Data may be stale</p>}
-      <p>Screens: {data.screens.length}</p>
-      <button onClick={refetch}>Refresh</button>
-    </div>
+    <Onboarding
+      appId="sample-app-id"
+      baseUrl="http://192.168.0.105:3000/onboarding"
+      onFinish={(collected) => console.log(collected)}
+    />
   );
 }
 ```
 
-### Hook with Custom Options
+## Props
 
-```typescript
-const { data, loading, error, refetch } = useOnboarding(appId, {
-  enabled: true,
-  refetchOnMount: true,
-  staleTime: 2 * 60 * 1000, // 2 minutes
-  cacheTime: 5 * 60 * 1000, // 5 minutes
-});
-```
+- `appId` (string, required): Application identifier used to fetch the onboarding config
+- `baseUrl` (string, optional): Defaults to `http://192.168.0.105:3000/onboarding`. The SDK will call `GET {baseUrl}/{appId}`
+- `onFinish` (function, optional): Called with all collected data when onboarding completes
 
-## API Reference
+## Data Flow
 
-### Functions
+- The SDK fetches from `GET {baseUrl}/{appId}` and expects an envelope `{ success: boolean, data: OnboardingData }`
+- If the network fails, it falls back to a local JSON config bundled with the package
+- The SDK caches the last successful config using AsyncStorage for basic offline support
 
-#### `getOnboardingData(appId: string, config?: OnboardingConfig): Promise<OnboardingResponse>`
+## Screen Types
 
-Fetches onboarding data from the backend API.
+- `text`: Title + subtitle with configurable colors
+- `fileUpload`: Uses `expo-document-picker` to select a file; filename is stored
+- `banner`: Large banner style with CTA buttons
 
-**Parameters:**
-- `appId` (required): The application ID to fetch onboarding data for
-- `config` (optional): Configuration object with baseUrl and timeout
+## Collected Data Shape
 
-**Returns:** Promise that resolves to an `OnboardingResponse`
-
-#### `isOnboardingSuccess(response: OnboardingResponse): boolean`
-
-Type guard to check if the response was successful.
-
-#### `getOnboardingErrorMessage(response: OnboardingResponse): string`
-
-Extracts error message from response.
-
-### React Hooks
-
-#### `useOnboarding(appId: string, options?: UseOnboardingOptions): UseOnboardingResult`
-
-React hook for fetching and caching onboarding data.
-
-**Parameters:**
-- `appId` (required): The application ID
-- `options` (optional): Hook configuration options
-
-**Returns:** Object with `data`, `loading`, `error`, `refetch`, and `isStale`
-
-## Types
-
-### OnboardingData
-
-```typescript
-interface OnboardingData {
-  _id: string;
-  appId: string;
-  screens: OnboardingScreen[];
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
+```ts
+{
+  [screenId: string]: {
+    screenId: string;
+    actionClicked: string;
+    timestamp: string;
+    fileUploaded?: string;
+  }
 }
 ```
 
-### OnboardingScreen
+## Example Backend Response
 
-```typescript
-interface OnboardingScreen {
-  id: string;
-  type: 'text' | 'fileUpload' | 'banner';
-  content: OnboardingContent;
-  actions: OnboardingAction[];
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "68a16fed4fc91007bd28ff9f",
+    "appId": "jakir-board",
+    "screens": [ /* ... see your backend payload ... */ ],
+    "createdAt": "2025-08-17T06:00:13.277Z",
+    "updatedAt": "2025-08-17T06:00:13.277Z",
+    "__v": 0
+  }
 }
 ```
 
-### OnboardingError
+## Expo Compatibility
 
-```typescript
-interface OnboardingError {
-  code: 'NETWORK_ERROR' | 'INVALID_APP_ID' | 'NOT_FOUND' | 'SERVER_ERROR' | 'TIMEOUT' | 'UNKNOWN';
-  message: string;
-  details?: any;
-}
+- Works in Expo Managed workflow (iOS/Android)
+- No custom native modules beyond standard peer dependencies
+
+## Project Structure
+
+```
+src/
+  index.ts
+  Onboarding.tsx
+  screens/
+    TextScreen.tsx
+    FileUploadScreen.tsx
+    BannerScreen.tsx
+  utils/
+    api.ts
+    cache.ts
+    types.ts
+assets/config/fakeDB.json
 ```
 
-## Error Handling
+## Notes
 
-The SDK provides comprehensive error handling with typed error codes:
-
-- `NETWORK_ERROR`: Unable to connect to the server
-- `INVALID_APP_ID`: Invalid or empty app ID provided
-- `NOT_FOUND`: Onboarding data not found for the app ID
-- `SERVER_ERROR`: Server returned an error
-- `TIMEOUT`: Request timed out
-- `UNKNOWN`: Unexpected error occurred
-
-## Features
-
-### Core Features
-- **TypeScript Support**: Full type safety with comprehensive interfaces
-- **API Integration**: Fetch data from your backend API endpoint
-- **React Hooks**: Built-in hooks with caching and state management
-- **Error Handling**: Typed error codes and comprehensive error messages
-- **Caching**: Configurable caching with stale time management
-- **Configurable**: Custom base URLs, timeouts, and options
-
-### Backend Integration
-- **RESTful API**: Works with your existing `/api/onboarding/:appId` endpoint
-- **Response Format**: Handles your API's `{ success: true, data: {...} }` format
-- **Error Mapping**: Maps HTTP status codes to typed error codes
-- **Timeout Support**: Configurable request timeouts
-
-### React Integration
-- **useOnboarding Hook**: Automatic data fetching and caching
-- **Loading States**: Built-in loading state management
-- **Error States**: Comprehensive error handling in React components
-- **Refetch Support**: Manual data refresh capabilities
-- **Stale Data Detection**: Know when data might be outdated
-
-## Requirements
-
-- Node.js >= 16.0.0
-- React >= 16.8.0 (for hooks)
-- TypeScript >= 4.9.0 (recommended)
+- Ensure your app installs the peer dependencies listed above
+- `baseUrl` can be omitted for production if your SDK bundles a default; override for local development
+- Data is logged to the console on finish and returned via `onFinish`
 
 ## License
 
 ISC
-
-## Author
-
-bless
