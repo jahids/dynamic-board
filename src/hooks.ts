@@ -4,8 +4,7 @@ import {
   UseOnboardingOptions, 
   UseOnboardingResult, 
   OnboardingData, 
-  OnboardingError,
-  OnboardingConfig 
+  OnboardingError
 } from './types';
 
 // Simple cache implementation
@@ -54,7 +53,6 @@ export function useOnboarding(
   const {
     enabled = true,
     refetchOnMount = true,
-    staleTime = 5 * 60 * 1000,
     cacheTime = 10 * 60 * 1000,
   } = options;
 
