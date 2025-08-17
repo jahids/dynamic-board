@@ -1,6 +1,6 @@
 {
-  "name": "@myorg/onboarding-sdk",
-  "version": "1.0.0",
+  "name": "react-onboarding-sdk",
+  "version": "1.0.1",
   "description": "A TypeScript SDK for fetching onboarding data from backend APIs with React hooks support",
   "license": "ISC",
   "author": "bless",
@@ -41,5 +41,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/myorg/onboarding-sdk.git"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

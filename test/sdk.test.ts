@@ -119,7 +119,7 @@ describe('Onboarding SDK', () => {
     const errorResponse = {
       success: false,
       error: {
-        code: 'NOT_FOUND',
+        code: 'NOT_FOUND' as const,
         message: 'Onboarding data not found'
       }
     };

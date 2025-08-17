@@ -1,4 +1,4 @@
-# @myorg/onboarding-sdk
+# react-onboarding-sdk
 
 A TypeScript SDK for fetching onboarding data from backend APIs with React hooks support.
 
@@ -16,13 +16,13 @@ A TypeScript SDK for fetching onboarding data from backend APIs with React hooks
 ## Installation
 
 ```bash
-npm install @myorg/onboarding-sdk
+npm install react-onboarding-sdk
 ```
 
 or
 
 ```bash
-yarn add @myorg/onboarding-sdk
+yarn add react-onboarding-sdk
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ yarn add @myorg/onboarding-sdk
 ### Basic Usage
 
 ```typescript
-import { getOnboardingData, isOnboardingSuccess } from '@myorg/onboarding-sdk';
+import { getOnboardingData, isOnboardingSuccess } from 'react-onboarding-sdk';
 
 async function fetchOnboardingData() {
   const response = await getOnboardingData('my-app-id');
@@ -48,7 +48,7 @@ async function fetchOnboardingData() {
 ### With Custom Configuration
 
 ```typescript
-import { getOnboardingData } from '@myorg/onboarding-sdk';
+import { getOnboardingData } from 'react-onboarding-sdk';
 
 const response = await getOnboardingData('my-app-id', {
   baseUrl: 'http://localhost:3000', // Override for local development
@@ -60,7 +60,7 @@ const response = await getOnboardingData('my-app-id', {
 
 ```typescript
 import React from 'react';
-import { useOnboarding } from '@myorg/onboarding-sdk';
+import { useOnboarding } from 'react-onboarding-sdk';
 
 function OnboardingComponent({ appId }: { appId: string }) {
   const { data, loading, error, refetch, isStale } = useOnboarding(appId);
