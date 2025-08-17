@@ -1,6 +1,6 @@
 {
   "name": "react-onboarding-sdk",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A TypeScript SDK for fetching onboarding data from backend APIs with React hooks support",
   "license": "ISC",
   "author": "bless",
