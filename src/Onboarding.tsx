@@ -36,19 +36,20 @@ export default function Onboarding({ appId, baseUrl, onFinish }: OnboardingProps
 		};
 	}, [appId, baseUrl]);
 
-	const onAction = (action: { label: string; target: string }, fileName?: string) => {
+	const onAction = (action: { label: string; target: string }, fileName?: string, fileMeta?: { name: string; type?: string; size?: number; uri?: string }) => {
 		const current = screens[index]!;
 		const entry = {
 			screenId: current.id,
 			actionClicked: action.label,
 			timestamp: new Date().toISOString(),
 			...(fileName ? { fileUploaded: fileName } : {}),
+			...(fileMeta ? { fileMeta } : {}),
 		};
 		setCollected((prev) => ({ ...prev, [current.id]: entry }));
 
 		if (action.target === 'end') {
 			const finalData = { ...collected, [current.id]: entry };
-			console.log('Onboarding finished. Collected data:', JSON.stringify(finalData, null, 2));
+			console.log('Onboarding finished. Collected data:\n', JSON.stringify(finalData, null, 2));
 			onFinish?.(finalData);
 			return;
 		}
@@ -88,7 +89,7 @@ export default function Onboarding({ appId, baseUrl, onFinish }: OnboardingProps
 		case 'text':
 			return <TextScreen content={current.content} actions={current.actions} onAction={(a) => onAction(a)} />;
 		case 'fileUpload':
-			return <FileUploadScreen content={current.content} actions={current.actions} onAction={(a, f) => onAction(a, f)} />;
+			return <FileUploadScreen content={current.content} actions={current.actions} onAction={(a, f, m) => onAction(a, f, m)} />;
 		case 'banner':
 			return <BannerScreen content={current.content} actions={current.actions} onAction={(a) => onAction(a)} />;
 		default:

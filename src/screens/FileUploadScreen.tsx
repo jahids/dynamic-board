@@ -6,22 +6,36 @@ import { OnboardingAction, OnboardingContent } from '../utils/types';
 interface Props {
 	content: OnboardingContent;
 	actions: OnboardingAction[];
-	onAction: (action: OnboardingAction, fileName?: string) => void;
+	onAction: (action: OnboardingAction, fileName?: string, fileMeta?: { name: string; type?: string; size?: number; uri?: string }) => void;
 }
 
 export default function FileUploadScreen({ content, actions, onAction }: Props) {
 	const [fileName, setFileName] = React.useState<string | undefined>();
+	const [fileMeta, setFileMeta] = React.useState<{ name: string; type?: string; size?: number; uri?: string } | undefined>();
 
 	const pick = async () => {
 		try {
 			const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
 			if (res.type === 'success') {
 				setFileName(res.name);
+				setFileMeta({ name: res.name, type: (res as any).mimeType, size: (res as any).size, uri: (res as any).uri });
 				Alert.alert('Selected', res.name);
 			}
 		} catch (e) {
 			Alert.alert('Error', 'Failed to pick document');
 		}
+	};
+
+	const renderPreview = () => {
+		if (!fileMeta) return null;
+		const type = (fileMeta.type || '').toLowerCase();
+		if (type.startsWith('video/')) {
+			return <Text style={styles.previewNote}>🎬 Video selected: {fileMeta.name}</Text>;
+		}
+		if (type.startsWith('audio/')) {
+			return <Text style={styles.previewNote}>🎵 Audio selected: {fileMeta.name}</Text>;
+		}
+		return <Text style={styles.previewNote}>📄 File selected: {fileMeta.name}</Text>;
 	};
 
 	return (
@@ -34,10 +48,11 @@ export default function FileUploadScreen({ content, actions, onAction }: Props) 
 				<TouchableOpacity style={styles.upload} onPress={pick}>
 					<Text style={styles.uploadText}>{fileName ? `✓ ${fileName}` : '📁 Choose File'}</Text>
 				</TouchableOpacity>
+				{renderPreview()}
 			</View>
 			<View style={styles.actions}>
 				{actions.map((a, idx) => (
-					<TouchableOpacity key={idx} style={[styles.button, { backgroundColor: a.background }]} onPress={() => onAction(a, fileName)}>
+					<TouchableOpacity key={idx} style={[styles.button, { backgroundColor: a.background }]} onPress={() => onAction(a, fileName, fileMeta)}>
 						<Text style={[styles.buttonText, { color: a.color }]}>{a.label}</Text>
 					</TouchableOpacity>
 				))}
@@ -53,6 +68,7 @@ const styles = StyleSheet.create({
 	subtitle: { fontSize: 16, textAlign: 'center', marginBottom: 16 },
 	upload: { backgroundColor: '#007AFF', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, marginTop: 12 },
 	uploadText: { color: '#fff', fontWeight: '600' },
+	previewNote: { marginTop: 8, color: '#666' },
 	actions: { flexDirection: 'row', justifyContent: 'space-around', paddingBottom: 32 },
 	button: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 },
 	buttonText: { fontSize: 16, fontWeight: '600' },

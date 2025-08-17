@@ -48,6 +48,7 @@ export type CollectedData = Record<
 		actionClicked: string;
 		timestamp: string;
 		fileUploaded?: string;
+		fileMeta?: { name: string; type?: string; size?: number; uri?: string };
 	}
 >;
 
