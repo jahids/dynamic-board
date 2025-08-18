@@ -1,6 +1,6 @@
 # react-onboarding-sdk
 
-Mobile-first, Expo-focused onboarding SDK for React Native apps. Fetches onboarding flows from your backend and renders professional screens with automatic navigation and data collection.
+Mobile-first, Expo-focused onboarding SDK for React Native apps. Fetches multi-element onboarding flows from your backend (or bundled JSON) and renders premium, minimal UI inspired by Apple’s design system.
 
 ## Installation
 
@@ -34,26 +34,73 @@ export default function App() {
 
 ## Data Flow
 
-- The SDK fetches from `GET {baseUrl}/{appId}` and expects an envelope `{ success: boolean, data: OnboardingData }`
-- If the network fails, it falls back to a local JSON config bundled with the package
-- The SDK caches the last successful config using AsyncStorage for basic offline support
+- The SDK fetches from `GET {baseUrl}/{appId}` and expects an envelope `{ success: boolean, data: OnboardingConfig }`
+- If the network fails, it falls back to a bundled JSON at `assets/config/fakeDB.json`
+- The renderer is schema-driven; each screen contains an array of elements (text, image, button, input, fileUpload, multiSelect, progress, carousel, permissionList, banner)
 
-## Screen Types
+## Schema
 
-- `text`: Title + subtitle with configurable colors
-- `fileUpload`: Uses `expo-document-picker` to select a file; filename is stored
-- `banner`: Large banner style with CTA buttons
+High-level shape of the new config:
+
+```ts
+interface OnboardingConfig {
+  appId: string;
+  configId?: string;
+  version?: number;
+  locale?: string;
+  meta?: { ttlSeconds?: number; updatedAt?: string };
+  theme?: {
+    colors?: { primary?: string; background?: string; text?: string; muted?: string; success?: string; danger?: string };
+    fonts?: { heading?: string; body?: string };
+  };
+  abTest?: Array<{ variant: string; weight: number; startScreen: string }>;
+  screens: Array<{
+    id: string;
+    name?: string;
+    layout?: { scroll?: boolean; padding?: number; align?: 'left' | 'center' | 'right' | 'stretch' };
+    background?: { color?: string };
+    elements: Element[]; // see below
+  }>;
+}
+
+type Element =
+  | { id: string; type: 'text'; props: { text: string; variant?: 'h1'|'h2'|'h3'|'body'|'caption'; color?: string; align?: 'left'|'center'|'right'|'stretch' } }
+  | { id: string; type: 'image'; props: { uri: string; height?: number; resizeMode?: 'cover'|'contain'|'stretch'|'center' } }
+  | { id: string; type: 'button'; props: { label: string; background?: string; color?: string; size?: 'sm'|'md'|'lg'|'xl'; leadingIcon?: string }, actions?: Action[] }
+  | { id: string; type: 'input'; props: { label: string; name: string; placeholder?: string; keyboardType?: string; required?: boolean } }
+  | { id: string; type: 'fileUpload'; props: { label: string; name: string; accept?: string[]; size?: 'sm'|'md'|'lg'|'xl' } }
+  | { id: string; type: 'multiSelect'; props: { label: string; name: string; options: string[] } }
+  | { id: string; type: 'progress'; props: { valueExpr: string; max?: number } }
+  | { id: string; type: 'carousel'; props: { autoplay?: boolean; interval?: number; slides: Array<{ image: string; caption?: string }> } }
+  | { id: string; type: 'permissionList'; props: { items: Array<{ permission: string; title: string; subtitle?: string }> } }
+  | { id: string; type: 'banner'; props: { title: string; subtitle?: string; background: string; color: string } };
+
+type Action =
+  | { type: 'navigate'; target: string }
+  | { type: 'validate'; fields: string[] }
+  | { type: 'analytics'; event: string }
+  | { type: 'api'; request: { method: 'GET'|'POST'|'PUT'|'PATCH'|'DELETE'; url: string; body?: object; headers?: Record<string,string> }, onSuccess?: Action, onError?: Action }
+  | { type: 'toast'; message: string }
+  | { type: 'requestPermission'; permissions: string[] }
+  | { type: 'finish' };
+```
 
 ## Collected Data Shape
 
 ```ts
-{
-  [screenId: string]: {
-    screenId: string;
-    actionClicked: string;
-    timestamp: string;
-    fileUploaded?: string;
-  }
+interface CollectedDataEvent {
+  screenId: string;
+  elementId?: string;
+  action: string;
+  timestamp: string;
+  meta?: Record<string, unknown>;
+}
+
+interface CollectedData {
+  appId: string;
+  configId?: string;
+  values: Record<string, string | number | boolean | string[] | { name: string; type?: string; size?: number; uri?: string } | null>;
+  events: CollectedDataEvent[];
 }
 ```
 
@@ -63,12 +110,11 @@ export default function App() {
 {
   "success": true,
   "data": {
-    "_id": "68a16fed4fc91007bd28ff9f",
-    "appId": "jakir-board",
-    "screens": [ /* ... see your backend payload ... */ ],
-    "createdAt": "2025-08-17T06:00:13.277Z",
-    "updatedAt": "2025-08-17T06:00:13.277Z",
-    "__v": 0
+    "appId": "com.example.app",
+    "configId": "cfg_2025_08_17_001",
+    "version": 1,
+    "locale": "en",
+    "screens": [ /* see assets/config/fakeDB.json for a full example */ ]
   }
 }
 ```
@@ -85,9 +131,9 @@ src/
   index.ts
   Onboarding.tsx
   screens/
-    TextScreen.tsx
-    FileUploadScreen.tsx
-    BannerScreen.tsx
+    ScreenRenderer.tsx
+    elements/
+      index.tsx
   utils/
     api.ts
     cache.ts
@@ -95,11 +141,26 @@ src/
 assets/config/fakeDB.json
 ```
 
-## Notes
+## Usage
 
-- Ensure your app installs the peer dependencies listed above
-- `baseUrl` can be omitted for production if your SDK bundles a default; override for local development
-- Data is logged to the console on finish and returned via `onFinish`
+```tsx
+import { Onboarding } from 'react-onboarding-sdk';
+
+export default function App() {
+  return (
+    <Onboarding
+      appId="com.example.app"
+      baseUrl="http://192.168.0.105:3000/onboarding"
+      onFinish={(collected) => console.log('Collected', collected)}
+    />
+  );
+}
+```
+
+- **appId**: used to fetch the JSON config from `GET {baseUrl}/{appId}`
+- **onFinish**: called when an element triggers `{ type: 'finish' }` action; returns `CollectedData`
+
+The SDK renders screens and elements strictly from the JSON schema. Styling follows a clean, minimal, system-font look suitable for iOS.
 
 ## License
 

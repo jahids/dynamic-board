@@ -1,4 +1,4 @@
-import { ApiEnvelope, OnboardingData, FetchOptions } from './types';
+import { ApiEnvelope, OnboardingConfig, FetchOptions } from './types';
 
 const DEFAULT_BASE_URL = 'http://192.168.0.105:3000/onboarding';
 const DEFAULT_TIMEOUT = 10000;
@@ -26,7 +26,7 @@ function buildUrl(baseUrl: string, appId: string): string {
 	return `${trimmed}/${encodedId}`;
 }
 
-export async function fetchOnboardingConfig(appId: string, options: FetchOptions = {}): Promise<OnboardingData> {
+export async function fetchOnboardingConfig(appId: string, options: FetchOptions = {}): Promise<OnboardingConfig> {
 	const baseUrl = options.baseUrl || DEFAULT_BASE_URL;
 	const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT;
 
@@ -40,7 +40,7 @@ export async function fetchOnboardingConfig(appId: string, options: FetchOptions
 		if (!('ok' in res) || !(res as Response).ok) {
 			throw new Error(`HTTP ${(res as Response).status}`);
 		}
-		const json = (await (res as Response).json()) as ApiEnvelope;
+		const json = (await (res as Response).json()) as ApiEnvelope<OnboardingConfig>;
 		if (!json.success || !json.data || !Array.isArray(json.data.screens)) {
 			throw new Error('Invalid response');
 		}
@@ -50,13 +50,15 @@ export async function fetchOnboardingConfig(appId: string, options: FetchOptions
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		const local = require('../../assets/config/fakeDB.json');
 		if (local && local.screens) {
-			const fake: OnboardingData = {
-				_id: 'local-fake',
+			const fake: OnboardingConfig = {
 				appId,
+				configId: local.configId || 'local-fake',
+				version: local.version || 1,
+				locale: local.locale || 'en',
+				meta: local.meta || { ttlSeconds: 3600, updatedAt: new Date().toISOString() },
+				theme: local.theme,
+				abTest: local.abTest,
 				screens: local.screens,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-				__v: 0,
 			};
 			console.warn('[onboarding-sdk] Falling back to bundled fakeDB.json due to error:', (err as Error)?.message);
 			return fake;

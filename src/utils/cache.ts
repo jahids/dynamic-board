@@ -1,11 +1,11 @@
 // Caching disabled initially (no-op). Kept for future extension.
-import { OnboardingData } from './types';
+import { OnboardingConfig } from './types';
 
-export async function setCachedConfig(_: string, __: OnboardingData): Promise<void> {
+export async function setCachedConfig(_: string, __: OnboardingConfig): Promise<void> {
 	return;
 }
 
-export async function getCachedConfig(_: string): Promise<OnboardingData | null> {
+export async function getCachedConfig(_: string): Promise<OnboardingConfig | null> {
 	return null;
 }
 

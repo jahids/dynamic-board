@@ -5,6 +5,9 @@ declare module 'react-native' {
 	export const StyleSheet: { create: (s: any) => any };
 	export const TouchableOpacity: any;
 	export const Alert: any;
+	export const ScrollView: any;
+	export const Image: any;
+	export const TextInput: any;
 }
 
 declare module 'expo-document-picker' {

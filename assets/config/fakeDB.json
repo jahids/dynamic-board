@@ -1,90 +1,102 @@
 {
+  "appId": "com.example.app",
+  "configId": "cfg_2025_08_17_001",
+  "version": 1,
+  "locale": "en",
+  "meta": { "ttlSeconds": 3600, "updatedAt": "2025-08-17T07:30:00Z" },
+  "theme": {
+    "colors": {
+      "primary": "#007AFF",
+      "background": "#FFFFFF",
+      "text": "#222222",
+      "muted": "#6c757d",
+      "success": "#28a745",
+      "danger": "#dc3545"
+    },
+    "fonts": { "heading": "System", "body": "System" }
+  },
+  "abTest": [
+    { "variant": "A", "weight": 50, "startScreen": "welcome" },
+    { "variant": "B", "weight": 50, "startScreen": "subscription" }
+  ],
   "screens": [
     {
-      "id": "screen1",
-      "type": "text",
-      "content": {
-        "title": "Welcome to Our App demo file!",
-        "subtitle": "Let's get you started with a quick setup",
-        "color": "#333333",
-        "background": "#ffffff",
-        "fontSize": "xl"
-      },
-      "actions": [
+      "id": "welcome",
+      "name": "Welcome",
+      "layout": { "scroll": true, "padding": 16, "align": "center" },
+      "background": { "color": "#ffffff" },
+      "elements": [
+        { "id": "heroImage", "type": "image", "props": { "uri": "https://cdn.example.com/hero.png", "height": 180, "resizeMode": "contain" } },
+        { "id": "title1", "type": "text", "props": { "text": "👋 Welcome to Our App!", "variant": "h1", "color": "#222222", "align": "center" } },
+        { "id": "subtitle1", "type": "text", "props": { "text": "Let’s personalize your experience.", "variant": "body", "color": "#333333", "align": "center" } },
         {
+          "id": "ctaPrimary",
           "type": "button",
-          "label": "Next",
-          "color": "#ffffff",
-          "background": "#007AFF",
-          "target": "screen2"
-        }
-      ]
-    },
-    {
-      "id": "screen2",
-      "type": "fileUpload",
-      "content": {
-        "title": "Upload Your Profile Picture",
-        "subtitle": "This helps personalize your experience",
-        "size": "xl",
-        "color": "#333333",
-        "background": "#f8f9fa"
-      },
-      "actions": [
-        {
-          "type": "button",
-          "label": "Skip",
-          "color": "#666666",
-          "background": "transparent",
-          "target": "screen3"
+          "props": { "label": "Get Started", "background": "#007AFF", "color": "#ffffff", "size": "lg", "leadingIcon": "ArrowRight" },
+          "actions": [
+            { "type": "navigate", "target": "profile" },
+            { "type": "analytics", "event": "click_get_started" }
+          ]
         },
-        {
-          "type": "button",
-          "label": "Continue",
-          "color": "#ffffff",
-          "background": "#28a745",
-          "target": "screen3"
-        }
+        { "id": "ctaSecondary", "type": "button", "props": { "label": "Skip", "background": "#eeeeee", "color": "#333333", "size": "md" }, "actions": [ { "type": "navigate", "target": "marketing" } ] }
       ]
     },
     {
-      "id": "screen3",
-      "type": "text",
-      "content": {
-        "title": "Almost Done!",
-        "subtitle": "Just a few more details to complete your profile",
-        "color": "#333333",
-        "background": "#ffffff",
-        "fontSize": "lg"
-      },
-      "actions": [
-        {
-          "type": "button",
-          "label": "Finish Setup",
-          "color": "#ffffff",
-          "background": "#dc3545",
-          "target": "end"
-        }
+      "id": "profile",
+      "name": "Profile",
+      "layout": { "scroll": true, "padding": 16, "align": "stretch" },
+      "elements": [
+        { "id": "nameInput", "type": "input", "props": { "label": "Your Name", "name": "fullName", "placeholder": "Enter full name", "keyboardType": "default", "required": true } },
+        { "id": "avatarUpload", "type": "fileUpload", "props": { "label": "Upload Profile Picture", "name": "profilePhoto", "accept": ["image/*"], "size": "xl" } },
+        { "id": "interests", "type": "multiSelect", "props": { "label": "Choose Interests", "name": "interests", "options": ["Tech","Sports","Travel","Food","Finance"] } },
+        { "id": "progress", "type": "progress", "props": { "valueExpr": "progress.profile", "max": 100 } },
+        { "id": "nextBtn", "type": "button", "props": { "label": "Continue", "background": "#28a745", "color": "#ffffff" }, "actions": [ { "type": "validate", "fields": ["fullName"] }, { "type": "navigate", "target": "marketing" }, { "type": "analytics", "event": "profile_completed" } ] }
       ]
     },
     {
-      "id": "screen4",
-      "type": "banner",
-      "content": {
-        "title": "🎉 Setup Complete!",
-        "subtitle": "Thank you for completing the onboarding process",
-        "background": "#28a745",
-        "color": "#ffffff",
-        "fontSize": "xl"
-      },
-      "actions": [
+      "id": "marketing",
+      "name": "Offers",
+      "layout": { "scroll": true, "padding": 0 },
+      "elements": [
+        { "id": "offerCarousel", "type": "carousel", "props": { "autoplay": true, "interval": 3000, "slides": [ { "image": "https://cdn.example.com/promo1.png", "caption": "50% OFF today!" }, { "image": "https://cdn.example.com/promo2.png", "caption": "Invite friends, earn rewards" } ] } },
         {
+          "id": "claimOffer",
           "type": "button",
-          "label": "Get Started",
-          "color": "#28a745",
-          "background": "#ffffff",
-          "target": "end"
-        }
+          "props": { "label": "Claim Offer", "background": "#e83e8c", "color": "#ffffff" },
+          "actions": [
+            {
+              "type": "api",
+              "request": {
+                "method": "POST",
+                "url": "{{baseUrl}}/api/subscribe",
+                "body": { "plan": "trial" },
+                "headers": { "x-app-id": "{{appId}}" }
+              },
+              "onSuccess": { "type": "navigate", "target": "permissions" },
+              "onError":   { "type": "toast", "message": "Failed to start trial" }
+            }
+          ]
+        },
+        { "id": "skipOffer", "type": "button", "props": { "label": "Maybe Later", "background": "#6c757d", "color": "#ffffff" }, "actions": [ { "type": "navigate", "target": "permissions" } ] }
+      ]
+    },
+    {
+      "id": "permissions",
+      "name": "Permissions",
+      "layout": { "scroll": true, "padding": 16 },
+      "elements": [
+        { "id": "permList", "type": "permissionList", "props": { "items": [ { "permission": "notifications", "title": "Notifications", "subtitle": "Get updates & offers" }, { "permission": "location", "title": "Location", "subtitle": "Better local content" } ] } },
+        { "id": "enableAll", "type": "button", "props": { "label": "Enable", "background": "#007AFF", "color": "#ffffff" }, "actions": [ { "type": "requestPermission", "permissions": ["notifications","location"] }, { "type": "navigate", "target": "complete" } ] },
+        { "id": "notNow", "type": "button", "props": { "label": "Not Now", "background": "#eeeeee", "color": "#333333" }, "actions": [ { "type": "navigate", "target": "complete" } ] }
+      ]
+    },
+    {
+      "id": "complete",
+      "name": "Done",
+      "layout": { "scroll": true, "padding": 16, "align": "center" },
+      "elements": [
+        { "id": "doneBanner", "type": "banner", "props": { "title": "🎉 You're All Set!", "subtitle": "Enjoy your personalized experience.", "background": "#28a745", "color": "#ffffff" } },
+        { "id": "enterApp", "type": "button", "props": { "label": "Enter App", "background": "#ffffff", "color": "#28a745" }, "actions": [ { "type": "finish" }, { "type": "analytics", "event": "onboarding_finished" } ] }
       ]
     }
   ]
