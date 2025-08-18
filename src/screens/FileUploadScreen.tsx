@@ -15,13 +15,30 @@ export default function FileUploadScreen({ content, actions, onAction }: Props) 
 
 	const pick = async () => {
 		try {
-			const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
-			if (res.type === 'success') {
-				setFileName(res.name);
-				setFileMeta({ name: res.name, type: (res as any).mimeType, size: (res as any).size, uri: (res as any).uri });
-				Alert.alert('Selected', res.name);
+			const res: any = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
+			let asset: any | null = null;
+			if (res?.assets?.length) {
+				asset = res.assets[0];
+			} else if (res?.type === 'success') {
+				asset = res;
+			} else if (res?.canceled || res?.type === 'cancel') {
+				return;
+			}
+
+			if (asset) {
+				const name = asset.name || asset.file?.name || 'Selected file';
+				const uri = asset.uri;
+				const size = asset.size;
+				const type = asset.mimeType || asset.type;
+				setFileName(name);
+				setFileMeta({ name, type, size, uri });
+				console.log('[onboarding-sdk] picked file:', { name, type, size, uri });
+				Alert.alert('Selected', name);
+			} else {
+				Alert.alert('Error', 'No file selected');
 			}
 		} catch (e) {
+			console.warn('[onboarding-sdk] document pick error:', (e as Error)?.message);
 			Alert.alert('Error', 'Failed to pick document');
 		}
 	};
